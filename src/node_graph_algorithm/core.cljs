@@ -12,6 +12,12 @@
 (defn hexenate [b]
   (.join (.map (js/Array.from (.slice b)) #(.slice (str "0" (.toString (bit-and % 0xff) 16)) -2)) ""))
 
+(defn join-uint8arrays [a b]
+  (let [n (js/Uint8Array. (+ (.-length a) (.-length b)))]
+    (.set n a)
+    (.set n b (.-length a))
+    n))
+
 (defn make-node [nodes]
   (let [keypair (nacl.sign.keyPair)
         pk (.substr (hexenate (.-publicKey keypair)) 0 8)]

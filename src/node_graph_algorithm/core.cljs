@@ -6,8 +6,9 @@
 
 ; turn these into UI options
 (def introducer-nodes 3)
-(def peer-pool-size 4)
-(def node-count 25)
+(def peer-pool-size 6)
+(def node-count 45)
+(def with-connection-ordering false)
 
 (defn hexenate [b]
   (.join (.map (js/Array.from (.slice b)) #(.slice (str "0" (.toString (bit-and % 0xff) 16)) -2)) ""))
@@ -23,16 +24,25 @@
         pk (.substr (hexenate (.-publicKey keypair)) 0 8)]
     {:pk pk
      :keys keypair
-     :connections (map :pk (take peer-pool-size (random-sample 0.5 nodes)))}))
+     :connections (take peer-pool-size (random-sample 0.5 nodes))}))
 
 (defn order-connections [nodes new-node]
   
   )
 
+(defn add-connection [me new-node]
+  (let [connections (me :connections)
+        connections (conj connections new-node)
+        connections (take peer-pool-size (sort-by #(hexenate (nacl.hash (join-uint8arrays (.-publicKey (me :keys)) (.-publicKey (% :keys))))) connections))]
+    (assoc me :connections connections)))
+
 (defn introduce-new-node [nodes new-node]
   (let [connections (new-node :connections)]
-    ; ...
-    nodes))
+    (map
+      #(if (contains? (set connections) %)
+         (add-connection % new-node)
+         %)
+      nodes)))
 
 (defn graph-to-viz [nodes]
   (str "digraph G {\n"

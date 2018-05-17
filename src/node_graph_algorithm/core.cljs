@@ -38,7 +38,7 @@
   (str "digraph G {\n"
        (apply str
               (for [node nodes child (node :connections)]
-                (str "\tn" (name (node :pk)) " -> n" (name child) "\n")))
+                (str "\tn" (name (node :pk)) " -> n" (name (child :pk)) "\n")))
        "}"))
 
 (defn component-render-graph [nodes]
